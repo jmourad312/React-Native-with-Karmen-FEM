@@ -1,4 +1,4 @@
-import { StyleSheet, TextInput, View } from "react-native";
+import { ScrollView, StyleSheet, TextInput, View } from "react-native";
 import { ShoppingListItem } from "../components/ShoppingListItem";
 import { theme } from "../theme";
 import { useState } from "react";
@@ -13,6 +13,17 @@ const initialList: ShoppingListItemType[] = [
   { id: "1", name: "Coffee" },
   { id: "2", name: "Tea", isCompleted: true },
   { id: "3", name: "Nescafe", isCompleted: true },
+  { id: "4", name: "Nescafe", isCompleted: true },
+  { id: "5", name: "Nescafe", isCompleted: true },
+  { id: "6", name: "Nescafe", isCompleted: true },
+  { id: "7", name: "Nescafe", isCompleted: true },
+  { id: "8", name: "Nescafe", isCompleted: true },
+  { id: "9", name: "Nescafe", isCompleted: true },
+  { id: "0", name: "Nescafe", isCompleted: true },
+  { id: "10", name: "Nescafe", isCompleted: true },
+  { id: "11", name: "Nescafe", isCompleted: true },
+  { id: "12", name: "Nescafe", isCompleted: true },
+  { id: "13", name: "Nescafe", isCompleted: true },
 ];
 
 export default function Index() {
@@ -35,7 +46,11 @@ export default function Index() {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+      stickyHeaderIndices={[0]}
+    >
       <TextInput
         placeholder="E.G. Coffee"
         style={styles.textInput}
@@ -51,7 +66,7 @@ export default function Index() {
           key={item.id}
         />
       ))}
-    </View>
+    </ScrollView>
   );
 }
 
@@ -59,11 +74,14 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#fff",
-    justifyContent: "center",
     paddingTop: 12,
+  },
+  contentContainer: {
+    paddingBottom: 24,
   },
   textInput: {
     borderColor: theme.colorLightGray,
+    backgroundColor: theme.colorWhite,
     borderWidth: 2,
     padding: 12,
     marginHorizontal: 12,
