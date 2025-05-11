@@ -5,9 +5,17 @@ import * as Notifications from "expo-notifications";
 import { useEffect, useState } from "react";
 import { Duration, isBefore, intervalToDuration } from "date-fns";
 import { TimeSegment } from "../../components/TimerSegment";
+import { getFromStorage, saveToStorage } from "../../utils/storage";
 
 // 10 seconds from now (for testing)
-const timeStamp = Date.now() + 10 * 1000;
+const frequency = 10000;
+
+const countdownStorageKey = "taskly-countdown";
+
+type PersistedCountdownState = {
+  currentNotificationId: string | undefined;
+  completedAtTimeStamps: number[];
+};
 
 type CountDownStatus = {
   isOverdue: boolean;
@@ -15,15 +23,28 @@ type CountDownStatus = {
 };
 
 export default function CounterScreen() {
+  const [countdownState, setCountdownState] =
+    useState<PersistedCountdownState>();
   const [status, setStatus] = useState<CountDownStatus>({
     isOverdue: false,
     distance: {},
   });
 
-  console.log(status);
+  const lastCompletedAtTimeStamp = countdownState?.completedAtTimeStamps[0];
+
+  useEffect(() => {
+    const init = async () => {
+      const value = await getFromStorage(countdownStorageKey);
+      setCountdownState(value);
+    };
+    init();
+  }, []);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
+      const timeStamp = lastCompletedAtTimeStamp
+        ? lastCompletedAtTimeStamp + frequency
+        : Date.now();
       const isOverdue = isBefore(timeStamp, Date.now());
       const distance = intervalToDuration(
         isOverdue
@@ -37,18 +58,19 @@ export default function CounterScreen() {
     return () => {
       clearInterval(intervalId);
     };
-  }, []);
+  }, [lastCompletedAtTimeStamp]);
 
   const scheduleNotification = async () => {
+    let pushNotificationId;
     const result = await registerForPushNotificationsAsync();
     if (result === "granted") {
       console.log(result);
-      await Notifications.scheduleNotificationAsync({
+      pushNotificationId = await Notifications.scheduleNotificationAsync({
         content: {
-          title: "Hello From Taskly",
+          title: "Mission Is Due!!",
         },
         trigger: {
-          seconds: 5,
+          seconds: frequency / 1000,
         },
       });
     } else {
@@ -57,6 +79,20 @@ export default function CounterScreen() {
         "Please enable notifications in settings",
       );
     }
+    if (countdownState?.currentNotificationId) {
+      await Notifications.cancelScheduledNotificationAsync(
+        countdownState?.currentNotificationId,
+      );
+    }
+
+    const newCountdownState: PersistedCountdownState = {
+      currentNotificationId: pushNotificationId,
+      completedAtTimeStamps: countdownState
+        ? [Date.now(), ...countdownState.completedAtTimeStamps]
+        : [Date.now()],
+    };
+    setCountdownState(newCountdownState);
+    await saveToStorage(countdownStorageKey, newCountdownState);
   };
 
   return (
