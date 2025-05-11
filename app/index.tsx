@@ -6,12 +6,32 @@ import { useState } from "react";
 type ShoppingListItemType = {
   id: string;
   name: string;
-  isCompleted?: boolean;
+  completedAtTimeStamp?: number;
 };
 
 export default function Index() {
   const [inputValue, setInputValue] = useState("");
   const [shoppingList, setShoppingList] = useState<ShoppingListItemType[]>([]);
+
+  const handleDelete = (id: string) => {
+    const newShoppingList = shoppingList.filter((item) => item.id !== id);
+    setShoppingList(newShoppingList);
+  };
+
+  const handleToggleComplete = (id: string) => {
+    const newShoppingList = shoppingList.map((item) => {
+      if (item.id === id) {
+        return {
+          ...item,
+          completedAtTimeStamp: item.completedAtTimeStamp
+            ? undefined
+            : Date.now(),
+        };
+      }
+      return item;
+    });
+    setShoppingList(newShoppingList);
+  };
 
   const handleSubmit = () => {
     if (inputValue) {
@@ -48,7 +68,12 @@ export default function Index() {
       style={styles.container}
       stickyHeaderIndices={[0]}
       renderItem={({ item }) => (
-        <ShoppingListItem name={item.name} isCompleted={item.isCompleted} />
+        <ShoppingListItem
+          name={item.name}
+          onDelete={() => handleDelete(item.id)}
+          isCompleted={Boolean(item.completedAtTimeStamp)}
+          onToggleComplete={() => handleToggleComplete(item.id)}
+        />
       )}
     />
   );

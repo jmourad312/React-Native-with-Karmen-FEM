@@ -1,4 +1,10 @@
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  Alert,
+  Pressable,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+} from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { theme } from "../theme";
 import { AntDesign } from "@expo/vector-icons";
@@ -6,11 +12,15 @@ import { AntDesign } from "@expo/vector-icons";
 type Props = {
   name?: string;
   isCompleted?: boolean;
+  onDelete: () => void;
+  onToggleComplete: () => void;
 };
 
 export const ShoppingListItem = ({
   name = "Item",
   isCompleted = false,
+  onDelete,
+  onToggleComplete,
 }: Props) => {
   const handleDelete = () => {
     Alert.alert(
@@ -19,12 +29,12 @@ export const ShoppingListItem = ({
       [
         {
           text: "YES",
-          onPress: () => console.log("Item deleted"),
+          onPress: onDelete,
           style: "destructive",
         },
         {
           text: "Cancel",
-          onPress: () => console.log("Item not deleted"),
+          onPress: onDelete,
           style: "cancel",
         },
       ],
@@ -32,7 +42,8 @@ export const ShoppingListItem = ({
   };
 
   return (
-    <View
+    <Pressable
+      onPress={onToggleComplete}
       style={[
         styles.itemContainer,
         isCompleted ? styles.completedContainer : undefined,
@@ -56,7 +67,7 @@ export const ShoppingListItem = ({
       </TouchableOpacity>
 
       <StatusBar style="auto" />
-    </View>
+    </Pressable>
   );
 };
 
