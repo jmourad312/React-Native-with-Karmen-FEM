@@ -7,6 +7,7 @@ type ShoppingListItemType = {
   id: string;
   name: string;
   completedAtTimeStamp?: number;
+  lastUpdatedTimestamp: number;
 };
 
 export default function Index() {
@@ -23,6 +24,7 @@ export default function Index() {
       if (item.id === id) {
         return {
           ...item,
+          lastUpdatedTimestamp: Date.now(),
           completedAtTimeStamp: item.completedAtTimeStamp
             ? undefined
             : Date.now(),
@@ -39,12 +41,35 @@ export default function Index() {
         {
           id: new Date().toTimeString(),
           name: inputValue,
+          lastUpdatedTimestamp: Date.now(),
         },
         ...shoppingList,
       ];
       setShoppingList(newShoppingList);
       setInputValue("");
     }
+  };
+
+  const orderShoppingList = (shoppingList: ShoppingListItemType[]) => {
+    return shoppingList.sort((item1, item2) => {
+      if (item1.completedAtTimeStamp && item2.completedAtTimeStamp) {
+        return item2.completedAtTimeStamp - item1.completedAtTimeStamp;
+      }
+
+      if (item1.completedAtTimeStamp && !item2.completedAtTimeStamp) {
+        return 1;
+      }
+
+      if (!item1.completedAtTimeStamp && item2.completedAtTimeStamp) {
+        return -1;
+      }
+
+      if (!item1.completedAtTimeStamp && !item2.completedAtTimeStamp) {
+        return item2.lastUpdatedTimestamp - item1.lastUpdatedTimestamp;
+      }
+
+      return 0;
+    });
   };
 
   return (
@@ -64,7 +89,7 @@ export default function Index() {
           <Text>Your Shopping List Is Empty</Text>
         </View>
       }
-      data={shoppingList}
+      data={orderShoppingList(shoppingList)}
       style={styles.container}
       stickyHeaderIndices={[0]}
       renderItem={({ item }) => (
