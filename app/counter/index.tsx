@@ -5,17 +5,21 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  useWindowDimensions,
 } from "react-native";
 import { theme } from "../../theme";
 import { registerForPushNotificationsAsync } from "../../utils/registerForPushNotificationsAsync";
 import * as Notifications from "expo-notifications";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Duration, isBefore, intervalToDuration } from "date-fns";
 import { TimeSegment } from "../../components/TimerSegment";
 import { getFromStorage, saveToStorage } from "../../utils/storage";
+import * as Haptics from "expo-haptics";
+import ConfettiCannon from "react-native-confetti-cannon";
 
 // 10 seconds from now (for testing)
-const frequency = 10000;
+// const frequency = 14 * 24 * 60 * 60 * 1000;
+const frequency = 10 * 1000;
 
 export const countdownStorageKey = "taskly-countdown";
 
@@ -30,6 +34,8 @@ type CountDownStatus = {
 };
 
 export default function CounterScreen() {
+  const { width } = useWindowDimensions();
+  const confettiRef = useRef<any>();
   const [isLoading, setIsLoading] = useState(true);
   const [countdownState, setCountdownState] =
     useState<PersistedCountdownState>();
@@ -72,6 +78,8 @@ export default function CounterScreen() {
   }, [lastCompletedAtTimeStamp]);
 
   const scheduleNotification = async () => {
+    confettiRef?.current?.start();
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
     let pushNotificationId;
     const result = await registerForPushNotificationsAsync();
     if (result === "granted") {
@@ -130,11 +138,6 @@ export default function CounterScreen() {
       )}
       <View style={styles.row}>
         <TimeSegment
-          number={status.distance.weeks ?? 0}
-          unit="Weeks"
-          textStyle={status.isOverdue ? styles.whiteText : undefined}
-        />
-        <TimeSegment
           number={status.distance.days ?? 0}
           unit="Days"
           textStyle={status.isOverdue ? styles.whiteText : undefined}
@@ -162,6 +165,13 @@ export default function CounterScreen() {
       >
         <Text style={styles.buttonText}>Mission Complete</Text>
       </TouchableOpacity>
+      <ConfettiCannon
+        ref={confettiRef}
+        count={100}
+        autoStart={false}
+        origin={{ x: width / 2, y: -20 }}
+        fadeOut
+      />
     </View>
   );
 }
