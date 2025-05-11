@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, TextInput, View } from "react-native";
+import { StyleSheet, TextInput, FlatList, View, Text } from "react-native";
 import { ShoppingListItem } from "../components/ShoppingListItem";
 import { theme } from "../theme";
 import { useState } from "react";
@@ -9,27 +9,9 @@ type ShoppingListItemType = {
   isCompleted?: boolean;
 };
 
-const initialList: ShoppingListItemType[] = [
-  { id: "1", name: "Coffee" },
-  { id: "2", name: "Tea", isCompleted: true },
-  { id: "3", name: "Nescafe", isCompleted: true },
-  { id: "4", name: "Nescafe", isCompleted: true },
-  { id: "5", name: "Nescafe", isCompleted: true },
-  { id: "6", name: "Nescafe", isCompleted: true },
-  { id: "7", name: "Nescafe", isCompleted: true },
-  { id: "8", name: "Nescafe", isCompleted: true },
-  { id: "9", name: "Nescafe", isCompleted: true },
-  { id: "0", name: "Nescafe", isCompleted: true },
-  { id: "10", name: "Nescafe", isCompleted: true },
-  { id: "11", name: "Nescafe", isCompleted: true },
-  { id: "12", name: "Nescafe", isCompleted: true },
-  { id: "13", name: "Nescafe", isCompleted: true },
-];
-
 export default function Index() {
   const [inputValue, setInputValue] = useState("");
-  const [shoppingList, setShoppingList] =
-    useState<ShoppingListItemType[]>(initialList);
+  const [shoppingList, setShoppingList] = useState<ShoppingListItemType[]>([]);
 
   const handleSubmit = () => {
     if (inputValue) {
@@ -46,27 +28,29 @@ export default function Index() {
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-      stickyHeaderIndices={[0]}
-    >
-      <TextInput
-        placeholder="E.G. Coffee"
-        style={styles.textInput}
-        value={inputValue}
-        onChangeText={setInputValue}
-        onSubmitEditing={handleSubmit}
-        returnKeyType="done"
-      />
-      {shoppingList.map((item) => (
-        <ShoppingListItem
-          name={item.name}
-          isCompleted={item.isCompleted}
-          key={item.id}
+    <FlatList
+      ListHeaderComponent={
+        <TextInput
+          placeholder="E.G. Coffee"
+          style={styles.textInput}
+          value={inputValue}
+          onChangeText={setInputValue}
+          onSubmitEditing={handleSubmit}
+          returnKeyType="done"
         />
-      ))}
-    </ScrollView>
+      }
+      ListEmptyComponent={
+        <View style={styles.listEmptyContainer}>
+          <Text>Your Shopping List Is Empty</Text>
+        </View>
+      }
+      data={shoppingList}
+      style={styles.container}
+      stickyHeaderIndices={[0]}
+      renderItem={({ item }) => (
+        <ShoppingListItem name={item.name} isCompleted={item.isCompleted} />
+      )}
+    />
   );
 }
 
@@ -76,8 +60,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     paddingTop: 12,
   },
-  contentContainer: {
-    paddingBottom: 24,
+  listEmptyContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginVertical: 18,
   },
   textInput: {
     borderColor: theme.colorLightGray,
