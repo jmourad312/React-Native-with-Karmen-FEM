@@ -2,7 +2,7 @@ import { StyleSheet, TextInput, FlatList, View, Text } from "react-native";
 import { ShoppingListItem } from "../components/ShoppingListItem";
 import { theme } from "../theme";
 import { useEffect, useState } from "react";
-import {getFromStorage, saveToStorage} from "../utils/storage";
+import { getFromStorage, saveToStorage} from "../utils/storage";
 
 const storageKey = "shopping-list";
 
